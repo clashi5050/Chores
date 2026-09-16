@@ -50,6 +50,6 @@ variable "type" {
 }
 
 variable "app" {
-  description = "Application name used in resource naming (e.g. starsquad)."
+  description = "Application name used in resource naming (e.g. chores)."
   type        = string
 }

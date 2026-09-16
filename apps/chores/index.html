@@ -1,0 +1,1094 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Chore Wars</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f6f3ee;
+    --card: #ffffff;
+    --ink: #26221d;
+    --muted: #746b5e;
+    --line: #e7e0d4;
+    --accent: #e0562f;
+    --accent-ink: #ffffff;
+    --accent-soft: #fde7dd;
+    --p1: #2f6fed;
+    --p2: #d13a7c;
+    --jar: #1f9c6e;
+    --good: #1f9c6e;
+    --bad: #d13a3a;
+    --shadow: 0 1px 2px rgba(30, 24, 14, 0.06), 0 8px 24px rgba(30, 24, 14, 0.06);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17140f;
+      --card: #221e18;
+      --ink: #f1ece2;
+      --muted: #a99d8a;
+      --line: #382f24;
+      --accent: #ff7a4d;
+      --accent-ink: #201203;
+      --accent-soft: #402216;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17140f;
+    --card: #221e18;
+    --ink: #f1ece2;
+    --muted: #a99d8a;
+    --line: #382f24;
+    --accent: #ff7a4d;
+    --accent-ink: #201203;
+    --accent-soft: #402216;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+  button { font: inherit; }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 16px 16px 48px; }
+
+  header.top {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px; position: sticky; top: env(safe-area-inset-top, 0px);
+    background: var(--bg); z-index: 5; border-bottom: 1px solid var(--line);
+  }
+  header.top h1 { font-size: 20px; margin: 0; flex: 1; letter-spacing: -0.01em; }
+  .icon-btn {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    width: 38px; height: 38px; border-radius: 12px; cursor: pointer; font-size: 17px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .icon-btn:active { transform: scale(0.96); }
+  .sync-dot {
+    width: 9px; height: 9px; border-radius: 50%; background: var(--good);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .sync-dot.offline { background: var(--bad); }
+  .sync-dot.busy { background: #d9a021; }
+
+  section { margin: 18px 0; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 10px 2px; }
+
+  .scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .player-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 14px; box-shadow: var(--shadow); position: relative; overflow: hidden;
+  }
+  .player-card .stripe { position: absolute; inset: 0 0 auto 0; height: 4px; }
+  .player-card .head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .player-card .emoji { font-size: 26px; }
+  .player-card .name { font-weight: 700; font-size: 15px; }
+  .player-card .crown { margin-left: auto; font-size: 16px; }
+  .player-card .rank { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+  .player-card .week-points { font-size: 24px; font-weight: 800; }
+  .player-card .week-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .player-card .bar { height: 6px; border-radius: 4px; background: var(--line); margin: 8px 0 6px; overflow: hidden; }
+  .player-card .bar > i { display: block; height: 100%; border-radius: 4px; }
+  .player-card .foot { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+  .player-card .streak { font-weight: 700; color: var(--ink); }
+
+  .jar-card {
+    background: linear-gradient(135deg, var(--accent-soft), var(--card));
+    border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow);
+  }
+  .jar-card .jar-emoji { font-size: 30px; }
+  .jar-card .jar-total { font-size: 22px; font-weight: 800; }
+  .jar-card .jar-label { color: var(--muted); font-size: 12px; }
+
+  .task-grid { display: grid; gap: 8px; }
+  .task-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 10px 12px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow);
+  }
+  .task-card .task-emoji { font-size: 22px; width: 30px; text-align: center; }
+  .task-card .task-info { flex: 1; min-width: 0; }
+  .task-card .task-name { font-weight: 600; font-size: 14px; }
+  .task-card .task-pts { color: var(--muted); font-size: 12px; }
+  .task-actions { display: flex; gap: 6px; }
+  .person-btn {
+    width: 40px; height: 40px; border-radius: 12px; border: 1.5px solid var(--line);
+    background: var(--bg); font-size: 18px; cursor: pointer; position: relative;
+  }
+  .person-btn[data-person="p1"] { border-color: color-mix(in srgb, var(--p1) 45%, var(--line)); }
+  .person-btn[data-person="p2"] { border-color: color-mix(in srgb, var(--p2) 45%, var(--line)); }
+  .person-btn.done[data-person="p1"] { background: color-mix(in srgb, var(--p1) 22%, var(--card)); border-color: var(--p1); }
+  .person-btn.done[data-person="p2"] { background: color-mix(in srgb, var(--p2) 22%, var(--card)); border-color: var(--p2); }
+  .person-btn.done::after {
+    content: "✓"; position: absolute; top: -5px; right: -5px; background: var(--good);
+    color: #fff; width: 16px; height: 16px; border-radius: 50%; font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .person-btn:active { transform: scale(0.94); }
+
+  .prize-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 8px; }
+  .prize-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 10px; text-align: center; box-shadow: var(--shadow);
+  }
+  .prize-card .prize-emoji { font-size: 24px; }
+  .prize-card .prize-name { font-weight: 600; font-size: 13px; margin: 4px 0 2px; }
+  .prize-card .prize-cost { color: var(--muted); font-size: 11px; margin-bottom: 8px; }
+  .redeem-btn {
+    width: 100%; border: none; border-radius: 10px; padding: 7px 0; font-size: 12px;
+    font-weight: 700; cursor: pointer; background: var(--accent); color: var(--accent-ink);
+  }
+  .redeem-btn.p1 { background: var(--p1); color: #fff; }
+  .redeem-btn.p2 { background: var(--p2); color: #fff; }
+  .redeem-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  #activityLog { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  #activityLog li {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 8px 10px; font-size: 12.5px; color: var(--muted); display: flex; gap: 8px;
+  }
+  #activityLog li time { flex-shrink: 0; color: var(--muted); opacity: 0.7; }
+  #activityLog .empty { text-align: center; padding: 14px; }
+
+  .pin-gate {
+    position: fixed; inset: 0; background: var(--bg); z-index: 50;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .pin-box {
+    max-width: 320px; width: 100%; text-align: center; background: var(--card);
+    border: 1px solid var(--line); border-radius: 18px; padding: 28px 22px; box-shadow: var(--shadow);
+  }
+  .pin-box h2 { text-transform: none; font-size: 18px; color: var(--ink); letter-spacing: normal; }
+  .pin-box p { color: var(--muted); font-size: 13px; }
+  .pin-box input {
+    width: 100%; text-align: center; letter-spacing: 0.3em; font-size: 22px; padding: 12px;
+    border-radius: 12px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink);
+    margin: 14px 0 10px;
+  }
+  .pin-box .err { color: var(--bad); font-size: 12.5px; min-height: 16px; }
+  .primary-btn {
+    background: var(--accent); color: var(--accent-ink); border: none; border-radius: 12px;
+    padding: 10px 18px; font-weight: 700; cursor: pointer; font-size: 14px;
+  }
+  .primary-btn:active { transform: scale(0.97); }
+
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(20, 16, 8, 0.45); z-index: 40;
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  @media (min-width: 640px) { .modal-backdrop { align-items: center; } }
+  .modal {
+    background: var(--bg); width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto;
+    border-radius: 20px 20px 0 0; padding: 18px 18px calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  @media (min-width: 640px) { .modal { border-radius: 20px; } }
+  .modal-head { display: flex; align-items: center; margin-bottom: 8px; }
+  .modal-head h2 { flex: 1; font-size: 16px; text-transform: none; letter-spacing: normal; color: var(--ink); }
+  .field-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .field-row input[type="text"], .field-row input[type="number"] {
+    flex: 1; min-width: 0; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--card); color: var(--ink);
+  }
+  .field-row input.emoji-input { flex: 0 0 52px; text-align: center; }
+  .field-row input.pts-input { flex: 0 0 66px; }
+  .field-row .del-btn {
+    flex: 0 0 auto; border: none; background: transparent; color: var(--bad); font-size: 18px; cursor: pointer;
+  }
+  .add-row { display: flex; gap: 8px; margin: 6px 0 18px; }
+  .add-row input { padding: 8px 10px; border-radius: 10px; border: 1px dashed var(--line); background: transparent; color: var(--ink); }
+  .settings-section { margin-bottom: 20px; }
+  .settings-section h3 { font-size: 13px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em; margin: 0 0 8px; }
+  .row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ghost-btn {
+    background: transparent; border: 1px solid var(--line); color: var(--ink); border-radius: 10px;
+    padding: 8px 12px; font-size: 13px; cursor: pointer;
+  }
+  .danger-btn { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, var(--line)); }
+  label.check { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+
+  .toast {
+    position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%); background: var(--ink); color: var(--bg);
+    padding: 10px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 600;
+    z-index: 60; box-shadow: var(--shadow); max-width: 90vw; text-align: center;
+  }
+  #confettiCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 45; }
+</style>
+</head>
+<body>
+
+<div id="pinGate" class="pin-gate" hidden>
+  <div class="pin-box">
+    <h2>🏆 Chore Wars</h2>
+    <p>Enter the household PIN (from <code>terraform output household_pin</code>) to sync with the shared board.</p>
+    <input id="pinInput" inputmode="numeric" maxlength="12" autocomplete="off" placeholder="••••••" />
+    <div class="err" id="pinErr"></div>
+    <button class="primary-btn" id="pinSubmit">Unlock</button>
+  </div>
+</div>
+
+<div id="app" class="wrap" hidden>
+  <header class="top">
+    <span class="sync-dot offline" id="syncDot" title="Sync status"></span>
+    <h1>🏆 Chore Wars</h1>
+    <button class="icon-btn" id="settingsBtn" title="Settings">⚙️</button>
+  </header>
+
+  <section class="scoreboard" id="scoreboard"></section>
+
+  <section class="jar-card" id="jarCard"></section>
+
+  <section class="tasks">
+    <h2>Today's Chores</h2>
+    <div class="task-grid" id="taskGrid"></div>
+  </section>
+
+  <section class="prizes">
+    <h2>Prize Shop</h2>
+    <div class="prize-row" id="prizeRow"></div>
+  </section>
+
+  <section class="activity">
+    <h2>Activity</h2>
+    <ul id="activityLog"></ul>
+  </section>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+<canvas id="confettiCanvas"></canvas>
+
+<div class="modal-backdrop" id="settingsBackdrop" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Settings</h2>
+      <button class="icon-btn" id="settingsClose">✕</button>
+    </div>
+
+    <div class="settings-section">
+      <h3>Players</h3>
+      <div id="playerFields"></div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Chores</h3>
+      <div id="taskFields"></div>
+      <div class="add-row">
+        <input type="text" id="newTaskEmoji" class="emoji-input" placeholder="🧽" style="flex:0 0 52px" />
+        <input type="text" id="newTaskName" placeholder="New chore name" />
+        <input type="number" id="newTaskPts" class="pts-input" placeholder="pts" style="flex:0 0 66px" />
+        <button class="ghost-btn" id="addTaskBtn">Add</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Prize Shop</h3>
+      <div id="prizeFields"></div>
+      <div class="add-row">
+        <input type="text" id="newPrizeEmoji" class="emoji-input" placeholder="🎁" style="flex:0 0 52px" />
+        <input type="text" id="newPrizeName" placeholder="New prize name" />
+        <input type="number" id="newPrizeCost" class="pts-input" placeholder="cost" style="flex:0 0 66px" />
+        <button class="ghost-btn" id="addPrizeBtn">Add</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Team Jar</h3>
+      <div class="field-row">
+        <span style="color:var(--muted); font-size:13px;">Points added to the jar per completed chore</span>
+        <input type="number" id="jarShareInput" class="pts-input" />
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Backup</h3>
+      <div class="row-actions">
+        <button class="ghost-btn" id="exportBtn">⬇ Export JSON</button>
+        <button class="ghost-btn" id="importBtn">⬆ Import JSON</button>
+        <input type="file" id="importFile" accept="application/json" hidden />
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Danger Zone</h3>
+      <div class="row-actions">
+        <button class="ghost-btn danger-btn" id="resetAllBtn">Reset all data</button>
+        <button class="ghost-btn danger-btn" id="forgetPinBtn">Forget PIN on this device</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------------------------------------------------------------------
+  // Constants & defaults
+  // ---------------------------------------------------------------------
+  const PIN_STORAGE_KEY = "chorewars_pin";
+  const CACHE_STORAGE_KEY = "chorewars_cache";
+  const POLL_MS = 10000;
+
+  const RANKS = [
+    { min: 0, title: "Chore Rookie", emoji: "🌱" },
+    { min: 100, title: "Task Tackler", emoji: "🧤" },
+    { min: 250, title: "Duty Dynamo", emoji: "⚡" },
+    { min: 500, title: "Household Hero", emoji: "🦸" },
+    { min: 1000, title: "Chore Champion", emoji: "👑" },
+    { min: 2000, title: "Legend of the Laundry Room", emoji: "🏆" },
+  ];
+
+  const CHEERS = [
+    "Nailed it. 😏", "Look at you go! 🔥", "Someone's after date night. 🍷",
+    "Adulting: achieved. ✅", "That's the spirit! ⭐", "Efficiency level: unlocked. 🚀",
+    "The house thanks you. 🏠", "Bragging rights secured. 🏆",
+  ];
+  const PRIZE_CHEERS = [
+    "Well earned! 🎉", "Cash it in! 💫", "Treat yourself. 🎁", "Victory lap. 🏁",
+  ];
+
+  function defaultState() {
+    return {
+      rev: 1,
+      people: [
+        { id: "p1", name: "Player 1", emoji: "🦁", points: 0, weeklyPoints: 0, streak: 0, bestStreak: 0, lastActiveDate: null, prevActiveDate: null, streakBumpedToday: false },
+        { id: "p2", name: "Player 2", emoji: "🦊", points: 0, weeklyPoints: 0, streak: 0, bestStreak: 0, lastActiveDate: null, prevActiveDate: null, streakBumpedToday: false },
+      ],
+      tasks: [
+        { id: "t1", name: "Dishes", emoji: "🍽️", points: 10 },
+        { id: "t2", name: "Laundry", emoji: "🧺", points: 15 },
+        { id: "t3", name: "Take Out Trash", emoji: "🗑️", points: 5 },
+        { id: "t4", name: "Vacuum", emoji: "🧹", points: 10 },
+        { id: "t5", name: "Groceries", emoji: "🛒", points: 15 },
+        { id: "t6", name: "Cook Dinner", emoji: "🍳", points: 15 },
+        { id: "t7", name: "Clean Bathroom", emoji: "🚽", points: 15 },
+        { id: "t8", name: "Walk Dog", emoji: "🐕", points: 5 },
+        { id: "t9", name: "Yard Work", emoji: "🌱", points: 15 },
+        { id: "t10", name: "Pay Bills", emoji: "💳", points: 10 },
+      ],
+      prizes: [
+        { id: "pr1", name: "Pick the Movie", emoji: "🎬", cost: 50, fromJar: false },
+        { id: "pr2", name: "Sleep In", emoji: "😴", cost: 60, fromJar: false },
+        { id: "pr3", name: "Skip a Chore", emoji: "🙅", cost: 80, fromJar: false },
+        { id: "pr4", name: "Date Night", emoji: "🍷", cost: 200, fromJar: true },
+      ],
+      completions: {},   // "personId:taskId" -> "YYYY-MM-DD"
+      jar: 0,
+      jarShare: 3,
+      weekKey: mondayKey(new Date()),
+      log: [],           // [{ts, text}]
+    };
+  }
+
+  // ---------------------------------------------------------------------
+  // Date helpers
+  // ---------------------------------------------------------------------
+  function todayKey(d) {
+    d = d || new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function addDays(d, n) {
+    const c = new Date(d);
+    c.setDate(c.getDate() + n);
+    return c;
+  }
+  function yesterdayKey() {
+    return todayKey(addDays(new Date(), -1));
+  }
+  function mondayKey(d) {
+    const c = new Date(d);
+    const day = (c.getDay() + 6) % 7; // 0 = Monday
+    c.setDate(c.getDate() - day);
+    return todayKey(c);
+  }
+
+  // ---------------------------------------------------------------------
+  // App state
+  // ---------------------------------------------------------------------
+  let state = null;
+  let version = null;
+  let pin = localStorage.getItem(PIN_STORAGE_KEY) || "";
+  let syncing = false;
+  let online = false;
+  let pollTimer = null;
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  function rankFor(points) {
+    let r = RANKS[0];
+    for (const cand of RANKS) if (points >= cand.min) r = cand;
+    return r;
+  }
+
+  function loadCache() {
+    try {
+      const raw = localStorage.getItem(CACHE_STORAGE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch { return null; }
+  }
+  function saveCache() {
+    try { localStorage.setItem(CACHE_STORAGE_KEY, JSON.stringify({ state, version })); } catch {}
+  }
+
+  function log(text) {
+    state.log.unshift({ ts: Date.now(), text });
+    state.log = state.log.slice(0, 30);
+  }
+
+  function rolloverWeekIfNeeded() {
+    const key = mondayKey(new Date());
+    if (state.weekKey !== key) {
+      const leader = state.people.slice().sort((a, b) => b.weeklyPoints - a.weeklyPoints)[0];
+      if (leader && leader.weeklyPoints > 0) {
+        log(`📅 New week! Last week's crown went to ${esc(leader.emoji)} ${esc(leader.name)} with ${leader.weeklyPoints} pts.`);
+      }
+      state.people.forEach((p) => { p.weeklyPoints = 0; });
+      state.weekKey = key;
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // API layer
+  // ---------------------------------------------------------------------
+  async function apiGet() {
+    const res = await fetch("/api/state", { headers: { "x-household-pin": pin } });
+    if (res.status === 401) throw { pinInvalid: true };
+    if (!res.ok) throw new Error("GET /api/state " + res.status);
+    return res.json();
+  }
+  async function apiSave() {
+    const res = await fetch("/api/state", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-household-pin": pin },
+      body: JSON.stringify({ state, version }),
+    });
+    if (res.status === 401) throw { pinInvalid: true };
+    if (res.status === 409) {
+      const body = await res.json();
+      return { conflict: true, state: body.state, version: body.version };
+    }
+    if (!res.ok) throw new Error("POST /api/state " + res.status);
+    return res.json();
+  }
+
+  function setSyncDot(cls) {
+    const dot = document.getElementById("syncDot");
+    dot.className = "sync-dot " + (cls || "");
+  }
+
+  async function persist(actionAfterSync) {
+    saveCache();
+    render();
+    if (!pin) return;
+    syncing = true;
+    setSyncDot("busy");
+    try {
+      const result = await apiSave();
+      if (result.conflict) {
+        state = result.state;
+        version = result.version;
+        toast("Synced with the latest changes — give that another tap if it didn't stick.");
+        render();
+      } else {
+        version = result.version;
+        online = true;
+        setSyncDot("");
+      }
+    } catch (err) {
+      if (err && err.pinInvalid) return showPinGate("That PIN was rejected by the server.");
+      online = false;
+      setSyncDot("offline");
+    } finally {
+      syncing = false;
+      saveCache();
+    }
+  }
+
+  async function refreshFromServer(initial) {
+    if (!pin || syncing) return;
+    try {
+      const result = await apiGet();
+      online = true;
+      setSyncDot("");
+      if (result.state === null) {
+        // Nothing saved yet — seed the server with our current (default) state.
+        version = null;
+        await persist();
+        return;
+      }
+      if (!initial && result.version === version) return; // nothing changed
+      state = result.state;
+      version = result.version;
+      rolloverWeekIfNeeded();
+      saveCache();
+      render();
+    } catch (err) {
+      if (err && err.pinInvalid) return showPinGate("That PIN was rejected by the server.");
+      online = false;
+      setSyncDot("offline");
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // PIN gate
+  // ---------------------------------------------------------------------
+  function showPinGate(errMsg) {
+    document.getElementById("app").hidden = true;
+    document.getElementById("pinGate").hidden = false;
+    document.getElementById("pinErr").textContent = errMsg || "";
+    document.getElementById("pinInput").focus();
+  }
+  function hidePinGate() {
+    document.getElementById("pinGate").hidden = true;
+    document.getElementById("app").hidden = false;
+  }
+
+  document.getElementById("pinSubmit").addEventListener("click", submitPin);
+  document.getElementById("pinInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") submitPin();
+  });
+  async function submitPin() {
+    const val = document.getElementById("pinInput").value.trim();
+    if (!val) return;
+    pin = val;
+    document.getElementById("pinErr").textContent = "Checking…";
+    try {
+      const result = await apiGet();
+      localStorage.setItem(PIN_STORAGE_KEY, pin);
+      online = true;
+      if (result.state) {
+        state = result.state;
+        version = result.version;
+      } else {
+        state = state || defaultState();
+        version = null;
+        await persist();
+      }
+      rolloverWeekIfNeeded();
+      hidePinGate();
+      render();
+      startPolling();
+    } catch (err) {
+      document.getElementById("pinErr").textContent = "That PIN didn't work — double check it and try again.";
+    }
+  }
+
+  function startPolling() {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(() => refreshFromServer(false), POLL_MS);
+  }
+
+  // ---------------------------------------------------------------------
+  // Actions
+  // ---------------------------------------------------------------------
+  function doneKey(personId, taskId) { return personId + ":" + taskId; }
+  function isDoneToday(personId, taskId) {
+    return state.completions[doneKey(personId, taskId)] === todayKey();
+  }
+
+  function bumpStreak(person) {
+    const today = todayKey();
+    if (person.lastActiveDate === today) return; // already counted today
+    person.prevActiveDate = person.lastActiveDate;
+    person.streak = person.lastActiveDate === yesterdayKey() ? person.streak + 1 : 1;
+    person.bestStreak = Math.max(person.bestStreak, person.streak);
+    person.lastActiveDate = today;
+    person.streakBumpedToday = true;
+  }
+  function revertStreakIfLastToday(person) {
+    const today = todayKey();
+    const stillActiveToday = state.tasks.some((t) => isDoneToday(person.id, t.id));
+    if (!stillActiveToday && person.streakBumpedToday && person.lastActiveDate === today) {
+      person.streak = Math.max(0, person.streak - 1);
+      person.lastActiveDate = person.prevActiveDate;
+      person.streakBumpedToday = false;
+    }
+  }
+
+  function toggleTask(personId, taskId) {
+    const person = state.people.find((p) => p.id === personId);
+    const task = state.tasks.find((t) => t.id === taskId);
+    if (!person || !task) return;
+    const key = doneKey(personId, taskId);
+    const wasDone = isDoneToday(personId, taskId);
+
+    if (wasDone) {
+      delete state.completions[key];
+      person.points = Math.max(0, person.points - task.points);
+      person.weeklyPoints = Math.max(0, person.weeklyPoints - task.points);
+      state.jar = Math.max(0, state.jar - state.jarShare);
+      revertStreakIfLastToday(person);
+      log(`↩️ ${esc(person.emoji)} ${esc(person.name)} undid ${esc(task.emoji)} ${esc(task.name)}.`);
+    } else {
+      state.completions[key] = todayKey();
+      person.points += task.points;
+      person.weeklyPoints += task.points;
+      state.jar += state.jarShare;
+      bumpStreak(person);
+      log(`${esc(task.emoji)} ${esc(person.emoji)} ${esc(person.name)} finished ${esc(task.name)} (+${task.points} pts).`);
+      celebrate();
+      toast(pick(CHEERS));
+    }
+    persist();
+  }
+
+  function redeemPrize(prizeId, personId) {
+    const prize = state.prizes.find((pr) => pr.id === prizeId);
+    const person = state.people.find((p) => p.id === personId);
+    if (!prize || !person) return;
+    if (prize.fromJar) {
+      if (state.jar < prize.cost) return;
+      state.jar -= prize.cost;
+    } else {
+      if (person.points < prize.cost) return;
+      person.points -= prize.cost;
+    }
+    log(`${esc(prize.emoji)} ${esc(person.emoji)} ${esc(person.name)} redeemed ${esc(prize.name)}.`);
+    celebrate();
+    toast(pick(PRIZE_CHEERS));
+    persist();
+  }
+
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  // ---------------------------------------------------------------------
+  // Rendering
+  // ---------------------------------------------------------------------
+  function render() {
+    if (!state) return;
+    renderScoreboard();
+    renderJar();
+    renderTasks();
+    renderPrizes();
+    renderActivity();
+  }
+
+  function renderScoreboard() {
+    const el = document.getElementById("scoreboard");
+    const leaderId = (() => {
+      const sorted = state.people.slice().sort((a, b) => b.weeklyPoints - a.weeklyPoints);
+      if (sorted.length < 2 || sorted[0].weeklyPoints === sorted[1].weeklyPoints || sorted[0].weeklyPoints === 0) return null;
+      return sorted[0].id;
+    })();
+
+    el.innerHTML = state.people.map((p, i) => {
+      const rank = rankFor(p.points);
+      const next = RANKS[RANKS.indexOf(rank) + 1];
+      const pct = next ? Math.min(100, Math.round(((p.points - rank.min) / (next.min - rank.min)) * 100)) : 100;
+      const color = i === 0 ? "var(--p1)" : "var(--p2)";
+      return `
+        <div class="player-card">
+          <div class="stripe" style="background:${color}"></div>
+          <div class="head">
+            <span class="emoji">${esc(p.emoji)}</span>
+            <span class="name">${esc(p.name)}</span>
+            ${leaderId === p.id ? '<span class="crown" title="Leading this week">👑</span>' : ""}
+          </div>
+          <div class="rank">${esc(rank.emoji)} ${esc(rank.title)}</div>
+          <div class="week-points">${p.weeklyPoints}</div>
+          <div class="week-label">points this week</div>
+          <div class="bar"><i style="width:${pct}%;background:${color}"></i></div>
+          <div class="foot">
+            <span>All-time: ${p.points}</span>
+            <span class="streak">🔥 ${p.streak}${p.streak >= (p.bestStreak || 0) && p.streak > 1 ? " (best!)" : ""}</span>
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  function renderJar() {
+    document.getElementById("jarCard").innerHTML = `
+      <span class="jar-emoji">🏺</span>
+      <div>
+        <div class="jar-total">${state.jar} pts</div>
+        <div class="jar-label">Team Jar — every chore chips in, spend it on household rewards together</div>
+      </div>`;
+  }
+
+  function renderTasks() {
+    const el = document.getElementById("taskGrid");
+    el.innerHTML = state.tasks.map((t) => `
+      <div class="task-card">
+        <span class="task-emoji">${esc(t.emoji)}</span>
+        <div class="task-info">
+          <div class="task-name">${esc(t.name)}</div>
+          <div class="task-pts">${t.points} pts</div>
+        </div>
+        <div class="task-actions">
+          ${state.people.map((p) => `
+            <button class="person-btn ${isDoneToday(p.id, t.id) ? "done" : ""}" data-person="${p.id}"
+              data-task="${t.id}" title="${esc(p.name)}">${esc(p.emoji)}</button>
+          `).join("")}
+        </div>
+      </div>
+    `).join("");
+    el.querySelectorAll(".person-btn").forEach((btn) => {
+      btn.addEventListener("click", () => toggleTask(btn.dataset.person, btn.dataset.task));
+    });
+  }
+
+  function renderPrizes() {
+    const el = document.getElementById("prizeRow");
+    el.innerHTML = state.prizes.map((pr) => `
+      <div class="prize-card">
+        <div class="prize-emoji">${esc(pr.emoji)}</div>
+        <div class="prize-name">${esc(pr.name)}</div>
+        <div class="prize-cost">${pr.cost} pts ${pr.fromJar ? "(jar)" : ""}</div>
+        ${pr.fromJar
+          ? `<button class="redeem-btn" data-prize="${pr.id}" data-person="${state.people[0].id}" ${state.jar < pr.cost ? "disabled" : ""}>Redeem</button>`
+          : state.people.map((p, i) => `
+              <button class="redeem-btn ${i === 0 ? "p1" : "p2"}" data-prize="${pr.id}" data-person="${p.id}"
+                ${p.points < pr.cost ? "disabled" : ""} style="margin-top:4px">${esc(p.emoji)} Redeem</button>
+            `).join("")}
+      </div>
+    `).join("");
+    el.querySelectorAll(".redeem-btn").forEach((btn) => {
+      btn.addEventListener("click", () => redeemPrize(btn.dataset.prize, btn.dataset.person));
+    });
+  }
+
+  function renderActivity() {
+    const el = document.getElementById("activityLog");
+    if (!state.log.length) {
+      el.innerHTML = '<li class="empty">No activity yet — go knock out a chore. 💪</li>';
+      return;
+    }
+    el.innerHTML = state.log.slice(0, 12).map((entry) => `
+      <li><time>${new Date(entry.ts).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</time><span>${entry.text}</span></li>
+    `).join("");
+  }
+
+  // ---------------------------------------------------------------------
+  // Toast, confetti, chime
+  // ---------------------------------------------------------------------
+  let toastTimer = null;
+  function toast(msg) {
+    const el = document.getElementById("toast");
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.hidden = true; }, 2400);
+  }
+
+  function celebrate() {
+    confettiBurst();
+    chime();
+  }
+
+  const confettiCanvas = document.getElementById("confettiCanvas");
+  const ctx = confettiCanvas.getContext("2d");
+  function resizeCanvas() {
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  let particles = [];
+  let confettiRAF = null;
+  function confettiBurst() {
+    const colors = ["#e0562f", "#2f6fed", "#d13a7c", "#1f9c6e", "#d9a021"];
+    const cx = confettiCanvas.width / 2;
+    for (let i = 0; i < 90; i++) {
+      particles.push({
+        x: cx + (Math.random() - 0.5) * 80,
+        y: confettiCanvas.height * 0.25,
+        vx: (Math.random() - 0.5) * 9,
+        vy: Math.random() * -9 - 3,
+        g: 0.28,
+        size: 4 + Math.random() * 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rot: Math.random() * Math.PI,
+        vr: (Math.random() - 0.5) * 0.3,
+        life: 90,
+      });
+    }
+    if (!confettiRAF) confettiRAF = requestAnimationFrame(tickConfetti);
+  }
+  function tickConfetti() {
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    particles.forEach((p) => {
+      p.vy += p.g; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life -= 1;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+      ctx.restore();
+    });
+    particles = particles.filter((p) => p.life > 0 && p.y < confettiCanvas.height + 40);
+    if (particles.length) {
+      confettiRAF = requestAnimationFrame(tickConfetti);
+    } else {
+      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      confettiRAF = null;
+    }
+  }
+
+  let audioCtx = null;
+  function chime() {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const now = audioCtx.currentTime;
+      [660, 880, 1100].forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, now + i * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.16, now + i * 0.08 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.08 + 0.3);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(now + i * 0.08);
+        osc.stop(now + i * 0.08 + 0.32);
+      });
+    } catch {}
+  }
+
+  // ---------------------------------------------------------------------
+  // Settings modal
+  // ---------------------------------------------------------------------
+  const backdrop = document.getElementById("settingsBackdrop");
+  document.getElementById("settingsBtn").addEventListener("click", openSettings);
+  document.getElementById("settingsClose").addEventListener("click", closeSettings);
+  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) closeSettings(); });
+
+  function openSettings() {
+    renderSettings();
+    backdrop.hidden = false;
+  }
+  function closeSettings() { backdrop.hidden = true; }
+
+  function renderSettings() {
+    document.getElementById("playerFields").innerHTML = state.people.map((p) => `
+      <div class="field-row">
+        <input type="text" class="emoji-input" data-role="p-emoji" data-id="${p.id}" value="${esc(p.emoji)}" />
+        <input type="text" data-role="p-name" data-id="${p.id}" value="${esc(p.name)}" />
+      </div>
+    `).join("");
+
+    document.getElementById("taskFields").innerHTML = state.tasks.map((t) => `
+      <div class="field-row">
+        <input type="text" class="emoji-input" data-role="t-emoji" data-id="${t.id}" value="${esc(t.emoji)}" />
+        <input type="text" data-role="t-name" data-id="${t.id}" value="${esc(t.name)}" />
+        <input type="number" class="pts-input" data-role="t-pts" data-id="${t.id}" value="${t.points}" />
+        <button class="del-btn" data-role="t-del" data-id="${t.id}" title="Remove">✕</button>
+      </div>
+    `).join("");
+
+    document.getElementById("prizeFields").innerHTML = state.prizes.map((pr) => `
+      <div class="field-row">
+        <input type="text" class="emoji-input" data-role="pr-emoji" data-id="${pr.id}" value="${esc(pr.emoji)}" />
+        <input type="text" data-role="pr-name" data-id="${pr.id}" value="${esc(pr.name)}" />
+        <input type="number" class="pts-input" data-role="pr-cost" data-id="${pr.id}" value="${pr.cost}" />
+        <label class="check"><input type="checkbox" data-role="pr-jar" data-id="${pr.id}" ${pr.fromJar ? "checked" : ""}/> jar</label>
+        <button class="del-btn" data-role="pr-del" data-id="${pr.id}" title="Remove">✕</button>
+      </div>
+    `).join("");
+
+    document.getElementById("jarShareInput").value = state.jarShare;
+
+    bindSettingsEvents();
+  }
+
+  function bindSettingsEvents() {
+    document.querySelectorAll('[data-role="p-emoji"], [data-role="p-name"]').forEach((input) => {
+      input.addEventListener("change", () => {
+        const p = state.people.find((x) => x.id === input.dataset.id);
+        if (!p) return;
+        if (input.dataset.role === "p-emoji") p.emoji = input.value.trim() || p.emoji;
+        else p.name = input.value.trim() || p.name;
+        persist();
+      });
+    });
+
+    document.querySelectorAll('[data-role="t-emoji"], [data-role="t-name"], [data-role="t-pts"]').forEach((input) => {
+      input.addEventListener("change", () => {
+        const t = state.tasks.find((x) => x.id === input.dataset.id);
+        if (!t) return;
+        if (input.dataset.role === "t-emoji") t.emoji = input.value.trim() || t.emoji;
+        else if (input.dataset.role === "t-name") t.name = input.value.trim() || t.name;
+        else t.points = Math.max(0, parseInt(input.value, 10) || 0);
+        persist();
+      });
+    });
+    document.querySelectorAll('[data-role="t-del"]').forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.tasks = state.tasks.filter((x) => x.id !== btn.dataset.id);
+        persist();
+        renderSettings();
+      });
+    });
+
+    document.querySelectorAll('[data-role="pr-emoji"], [data-role="pr-name"], [data-role="pr-cost"], [data-role="pr-jar"]').forEach((input) => {
+      input.addEventListener("change", () => {
+        const pr = state.prizes.find((x) => x.id === input.dataset.id);
+        if (!pr) return;
+        if (input.dataset.role === "pr-emoji") pr.emoji = input.value.trim() || pr.emoji;
+        else if (input.dataset.role === "pr-name") pr.name = input.value.trim() || pr.name;
+        else if (input.dataset.role === "pr-cost") pr.cost = Math.max(0, parseInt(input.value, 10) || 0);
+        else pr.fromJar = input.checked;
+        persist();
+      });
+    });
+    document.querySelectorAll('[data-role="pr-del"]').forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.prizes = state.prizes.filter((x) => x.id !== btn.dataset.id);
+        persist();
+        renderSettings();
+      });
+    });
+
+    document.getElementById("jarShareInput").addEventListener("change", (e) => {
+      state.jarShare = Math.max(0, parseInt(e.target.value, 10) || 0);
+      persist();
+    });
+  }
+
+  function nextId(prefix, list) {
+    let n = list.length + 1;
+    while (list.some((x) => x.id === prefix + n)) n++;
+    return prefix + n;
+  }
+
+  document.getElementById("addTaskBtn").addEventListener("click", () => {
+    const name = document.getElementById("newTaskName").value.trim();
+    if (!name) return;
+    const emoji = document.getElementById("newTaskEmoji").value.trim() || "🧽";
+    const pts = Math.max(0, parseInt(document.getElementById("newTaskPts").value, 10) || 10);
+    state.tasks.push({ id: nextId("t", state.tasks), name, emoji, points: pts });
+    document.getElementById("newTaskName").value = "";
+    document.getElementById("newTaskEmoji").value = "";
+    document.getElementById("newTaskPts").value = "";
+    persist();
+    renderSettings();
+  });
+
+  document.getElementById("addPrizeBtn").addEventListener("click", () => {
+    const name = document.getElementById("newPrizeName").value.trim();
+    if (!name) return;
+    const emoji = document.getElementById("newPrizeEmoji").value.trim() || "🎁";
+    const cost = Math.max(0, parseInt(document.getElementById("newPrizeCost").value, 10) || 50);
+    state.prizes.push({ id: nextId("pr", state.prizes), name, emoji, cost, fromJar: false });
+    document.getElementById("newPrizeName").value = "";
+    document.getElementById("newPrizeEmoji").value = "";
+    document.getElementById("newPrizeCost").value = "";
+    persist();
+    renderSettings();
+  });
+
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "chore-wars-backup-" + todayKey() + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
+  document.getElementById("importFile").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (!parsed || !Array.isArray(parsed.people) || !Array.isArray(parsed.tasks)) throw new Error("bad shape");
+        state = parsed;
+        persist();
+        render();
+        renderSettings();
+        toast("Backup restored.");
+      } catch {
+        toast("That file doesn't look like a Chore Wars backup.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+
+  document.getElementById("resetAllBtn").addEventListener("click", () => {
+    if (!confirm("Reset all chores, points, and prizes back to defaults? This can't be undone.")) return;
+    state = defaultState();
+    version = null;
+    persist();
+    render();
+    renderSettings();
+  });
+
+  document.getElementById("forgetPinBtn").addEventListener("click", () => {
+    localStorage.removeItem(PIN_STORAGE_KEY);
+    pin = "";
+    closeSettings();
+    if (pollTimer) clearInterval(pollTimer);
+    showPinGate("");
+  });
+
+  // ---------------------------------------------------------------------
+  // Boot
+  // ---------------------------------------------------------------------
+  async function boot() {
+    const cached = loadCache();
+    if (cached && cached.state) {
+      state = cached.state;
+      version = cached.version;
+    } else {
+      state = defaultState();
+      version = null;
+    }
+    rolloverWeekIfNeeded();
+
+    if (!pin) {
+      render();
+      showPinGate("");
+      return;
+    }
+
+    hidePinGate();
+    render();
+    try {
+      const result = await apiGet();
+      online = true;
+      if (result.state) {
+        state = result.state;
+        version = result.version;
+        rolloverWeekIfNeeded();
+      } else {
+        await persist();
+      }
+      render();
+      setSyncDot("");
+    } catch (err) {
+      if (err && err.pinInvalid) {
+        showPinGate("That PIN was rejected by the server.");
+      } else {
+        setSyncDot("offline");
+      }
+    }
+    startPolling();
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

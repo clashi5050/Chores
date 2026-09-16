@@ -1,0 +1,19 @@
+# Terraform
+Terraform/.terraform/
+Terraform/.terraform.lock.hcl
+Terraform/*.tfstate
+Terraform/*.tfstate.*
+Terraform/terraform.auto.tfvars
+Terraform/nonsecret.auto.tfvars
+Terraform/crash.log
+Terraform/crash.*.log
+
+# Azure Functions / Node
+apps/chores/api/node_modules/
+apps/chores/api/local.settings.json
+apps/chores/api/bin/
+apps/chores/api/obj/
+
+# OS / editor
+.DS_Store
+Thumbs.db

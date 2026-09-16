@@ -26,3 +26,9 @@ output "api_key" {
   value       = azurerm_static_web_app.app.api_key
   sensitive   = true
 }
+
+output "household_pin" {
+  description = "Shared PIN the Chore Wars app needs to call its API. Enter it once per device; it's cached in that browser's localStorage."
+  value       = random_password.household_pin.result
+  sensitive   = true
+}
