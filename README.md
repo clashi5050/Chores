@@ -11,14 +11,17 @@ a small backend instead of being localStorage-only.
 
 ## What it does
 
-- **Weekly scoreboard** — each of you has points, a weekly total (crowned
-  when you're ahead), an all-time total, and a streak counter for
-  consecutive active days. A cosmetic rank/title (Chore Rookie → Legend of
-  the Laundry Room) climbs with your all-time points.
-- **Task grid** — tap your avatar on a chore to mark it done for the day and
-  earn its points; tap again to undo a mis-tap. One completion per person
-  per chore per day, resetting automatically at midnight (no manual "new
-  day" button needed).
+- **Weekly scoreboard** — each of you has a chores-done-this-week count
+  (crowned when you're ahead), an all-time chores-done total, a points
+  balance saved up for the prize shop, and a streak counter for consecutive
+  active days.
+- **Task grid** — every chore carries a daily/weekly/monthly/yearly
+  frequency badge and points scaled to that tier (daily chores are worth
+  the least, yearly ones — like descaling the water heater — the most), but
+  all chores show every day regardless of frequency; tap your avatar on a
+  chore to mark it done for the day and earn its points; tap again to undo
+  a mis-tap. One completion per person per chore per day, resetting
+  automatically at midnight (no manual "new day" button needed).
 - **Team Jar** — every completed chore also feeds a shared pot (default 3
   pts), so it's competitive individually but cooperative as a household.
 - **Prize shop** — editable rewards spent from your own points or the
