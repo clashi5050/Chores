@@ -20,6 +20,14 @@
     --jar: #1f9c6e;
     --good: #1f9c6e;
     --bad: #d13a3a;
+    --freq-daily: #4a90d9;
+    --freq-daily-ink: #ffffff;
+    --freq-weekly: #1f9c6e;
+    --freq-weekly-ink: #ffffff;
+    --freq-monthly: #b5852f;
+    --freq-monthly-ink: #ffffff;
+    --freq-yearly: #8552d1;
+    --freq-yearly-ink: #ffffff;
     --shadow: 0 1px 2px rgba(30, 24, 14, 0.06), 0 8px 24px rgba(30, 24, 14, 0.06);
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -34,6 +42,14 @@
       --accent: #ff7a4d;
       --accent-ink: #201203;
       --accent-soft: #402216;
+      --freq-daily: #5a9ce6;
+      --freq-daily-ink: #0b1a2b;
+      --freq-weekly: #35c08c;
+      --freq-weekly-ink: #04231a;
+      --freq-monthly: #d9a33f;
+      --freq-monthly-ink: #2b1c02;
+      --freq-yearly: #a780e6;
+      --freq-yearly-ink: #1e0f30;
       --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
     }
   }
@@ -46,6 +62,14 @@
     --accent: #ff7a4d;
     --accent-ink: #201203;
     --accent-soft: #402216;
+    --freq-daily: #5a9ce6;
+    --freq-daily-ink: #0b1a2b;
+    --freq-weekly: #35c08c;
+    --freq-weekly-ink: #04231a;
+    --freq-monthly: #d9a33f;
+    --freq-monthly-ink: #2b1c02;
+    --freq-yearly: #a780e6;
+    --freq-yearly-ink: #1e0f30;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
   }
   * { box-sizing: border-box; }
@@ -94,11 +118,9 @@
   .player-card .emoji { font-size: 26px; }
   .player-card .name { font-weight: 700; font-size: 15px; }
   .player-card .crown { margin-left: auto; font-size: 16px; }
-  .player-card .rank { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
   .player-card .week-points { font-size: 24px; font-weight: 800; }
   .player-card .week-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .player-card .bar { height: 6px; border-radius: 4px; background: var(--line); margin: 8px 0 6px; overflow: hidden; }
-  .player-card .bar > i { display: block; height: 100%; border-radius: 4px; }
+  .player-card .coins { color: var(--muted); font-size: 12px; margin: 4px 0 8px; }
   .player-card .foot { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
   .player-card .streak { font-weight: 700; color: var(--ink); }
 
@@ -119,7 +141,16 @@
   .task-card .task-emoji { font-size: 22px; width: 30px; text-align: center; }
   .task-card .task-info { flex: 1; min-width: 0; }
   .task-card .task-name { font-weight: 600; font-size: 14px; }
+  .task-card .task-meta { display: flex; align-items: center; gap: 6px; }
   .task-card .task-pts { color: var(--muted); font-size: 12px; }
+  .freq-badge {
+    display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.03em; padding: 2px 7px; border-radius: 999px;
+  }
+  .freq-badge.freq-daily { background: var(--freq-daily); color: var(--freq-daily-ink); }
+  .freq-badge.freq-weekly { background: var(--freq-weekly); color: var(--freq-weekly-ink); }
+  .freq-badge.freq-monthly { background: var(--freq-monthly); color: var(--freq-monthly-ink); }
+  .freq-badge.freq-yearly { background: var(--freq-yearly); color: var(--freq-yearly-ink); }
   .task-actions { display: flex; gap: 6px; }
   .person-btn {
     width: 40px; height: 40px; border-radius: 12px; border: 1.5px solid var(--line);
@@ -201,11 +232,16 @@
   }
   .field-row input.emoji-input { flex: 0 0 52px; text-align: center; }
   .field-row input.pts-input { flex: 0 0 66px; }
+  .field-row select.freq-input {
+    flex: 0 0 92px; padding: 8px 6px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--card); color: var(--ink);
+  }
   .field-row .del-btn {
     flex: 0 0 auto; border: none; background: transparent; color: var(--bad); font-size: 18px; cursor: pointer;
   }
-  .add-row { display: flex; gap: 8px; margin: 6px 0 18px; }
+  .add-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 18px; }
   .add-row input { padding: 8px 10px; border-radius: 10px; border: 1px dashed var(--line); background: transparent; color: var(--ink); }
+  .add-row input:not(.emoji-input):not(.pts-input) { flex: 1 1 140px; min-width: 0; }
   .settings-section { margin-bottom: 20px; }
   .settings-section h3 { font-size: 13px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em; margin: 0 0 8px; }
   .row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -286,6 +322,12 @@
         <input type="text" id="newTaskEmoji" class="emoji-input" placeholder="🧽" style="flex:0 0 52px" />
         <input type="text" id="newTaskName" placeholder="New chore name" />
         <input type="number" id="newTaskPts" class="pts-input" placeholder="pts" style="flex:0 0 66px" />
+        <select id="newTaskFreq" class="freq-input">
+          <option value="daily">Daily</option>
+          <option value="weekly" selected>Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
         <button class="ghost-btn" id="addTaskBtn">Add</button>
       </div>
     </div>
@@ -339,14 +381,9 @@
   const CACHE_STORAGE_KEY = "chorewars_cache";
   const POLL_MS = 10000;
 
-  const RANKS = [
-    { min: 0, title: "Chore Rookie", emoji: "🌱" },
-    { min: 100, title: "Task Tackler", emoji: "🧤" },
-    { min: 250, title: "Duty Dynamo", emoji: "⚡" },
-    { min: 500, title: "Household Hero", emoji: "🦸" },
-    { min: 1000, title: "Chore Champion", emoji: "👑" },
-    { min: 2000, title: "Legend of the Laundry Room", emoji: "🏆" },
-  ];
+  const FREQUENCIES = ["daily", "weekly", "monthly", "yearly"];
+  const FREQ_LABELS = { daily: "Daily", weekly: "Weekly", monthly: "Monthly", yearly: "Yearly" };
+  const FREQ_DEFAULT_PTS = { daily: 5, weekly: 15, monthly: 40, yearly: 150 };
 
   const CHEERS = [
     "Nailed it. 😏", "Look at you go! 🔥", "Someone's after date night. 🍷",
@@ -361,20 +398,21 @@
     return {
       rev: 1,
       people: [
-        { id: "p1", name: "Player 1", emoji: "🦁", points: 0, weeklyPoints: 0, streak: 0, bestStreak: 0, lastActiveDate: null, prevActiveDate: null, streakBumpedToday: false },
-        { id: "p2", name: "Player 2", emoji: "🦊", points: 0, weeklyPoints: 0, streak: 0, bestStreak: 0, lastActiveDate: null, prevActiveDate: null, streakBumpedToday: false },
+        { id: "p1", name: "Player 1", emoji: "🦁", points: 0, completions: 0, weeklyCompletions: 0, streak: 0, bestStreak: 0, lastActiveDate: null, prevActiveDate: null, streakBumpedToday: false },
+        { id: "p2", name: "Player 2", emoji: "🦊", points: 0, completions: 0, weeklyCompletions: 0, streak: 0, bestStreak: 0, lastActiveDate: null, prevActiveDate: null, streakBumpedToday: false },
       ],
       tasks: [
-        { id: "t1", name: "Dishes", emoji: "🍽️", points: 10 },
-        { id: "t2", name: "Laundry", emoji: "🧺", points: 15 },
-        { id: "t3", name: "Take Out Trash", emoji: "🗑️", points: 5 },
-        { id: "t4", name: "Vacuum", emoji: "🧹", points: 10 },
-        { id: "t5", name: "Groceries", emoji: "🛒", points: 15 },
-        { id: "t6", name: "Cook Dinner", emoji: "🍳", points: 15 },
-        { id: "t7", name: "Clean Bathroom", emoji: "🚽", points: 15 },
-        { id: "t8", name: "Walk Dog", emoji: "🐕", points: 5 },
-        { id: "t9", name: "Yard Work", emoji: "🌱", points: 15 },
-        { id: "t10", name: "Pay Bills", emoji: "💳", points: 10 },
+        { id: "t1", name: "Dishes", emoji: "🍽️", points: 5, frequency: "daily" },
+        { id: "t2", name: "Take Out Trash", emoji: "🗑️", points: 5, frequency: "daily" },
+        { id: "t3", name: "Walk Dog", emoji: "🐕", points: 5, frequency: "daily" },
+        { id: "t4", name: "Cook Dinner", emoji: "🍳", points: 10, frequency: "daily" },
+        { id: "t5", name: "Laundry", emoji: "🧺", points: 20, frequency: "weekly" },
+        { id: "t6", name: "Vacuum", emoji: "🧹", points: 15, frequency: "weekly" },
+        { id: "t7", name: "Groceries", emoji: "🛒", points: 20, frequency: "weekly" },
+        { id: "t8", name: "Clean Bathroom", emoji: "🚽", points: 20, frequency: "weekly" },
+        { id: "t9", name: "Yard Work", emoji: "🌱", points: 40, frequency: "monthly" },
+        { id: "t10", name: "Pay Bills", emoji: "💳", points: 30, frequency: "monthly" },
+        { id: "t11", name: "Descale Water Heater", emoji: "🚿", points: 150, frequency: "yearly" },
       ],
       prizes: [
         { id: "pr1", name: "Pick the Movie", emoji: "🎬", cost: 50, fromJar: false },
@@ -428,10 +466,17 @@
       .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
-  function rankFor(points) {
-    let r = RANKS[0];
-    for (const cand of RANKS) if (points >= cand.min) r = cand;
-    return r;
+  function migrateState(s) {
+    s.tasks = Array.isArray(s.tasks) ? s.tasks : [];
+    s.people = Array.isArray(s.people) ? s.people : [];
+    s.tasks.forEach((t) => {
+      if (!FREQUENCIES.includes(t.frequency)) t.frequency = "daily";
+    });
+    s.people.forEach((p) => {
+      if (typeof p.completions !== "number") p.completions = 0;
+      if (typeof p.weeklyCompletions !== "number") p.weeklyCompletions = 0;
+    });
+    return s;
   }
 
   function loadCache() {
@@ -453,11 +498,11 @@
   function rolloverWeekIfNeeded() {
     const key = mondayKey(new Date());
     if (state.weekKey !== key) {
-      const leader = state.people.slice().sort((a, b) => b.weeklyPoints - a.weeklyPoints)[0];
-      if (leader && leader.weeklyPoints > 0) {
-        log(`📅 New week! Last week's crown went to ${esc(leader.emoji)} ${esc(leader.name)} with ${leader.weeklyPoints} pts.`);
+      const leader = state.people.slice().sort((a, b) => b.weeklyCompletions - a.weeklyCompletions)[0];
+      if (leader && leader.weeklyCompletions > 0) {
+        log(`📅 New week! Last week's crown went to ${esc(leader.emoji)} ${esc(leader.name)} with ${leader.weeklyCompletions} chores done.`);
       }
-      state.people.forEach((p) => { p.weeklyPoints = 0; });
+      state.people.forEach((p) => { p.weeklyCompletions = 0; });
       state.weekKey = key;
     }
   }
@@ -500,7 +545,7 @@
     try {
       const result = await apiSave();
       if (result.conflict) {
-        state = result.state;
+        state = migrateState(result.state);
         version = result.version;
         toast("Synced with the latest changes — give that another tap if it didn't stick.");
         render();
@@ -532,7 +577,7 @@
         return;
       }
       if (!initial && result.version === version) return; // nothing changed
-      state = result.state;
+      state = migrateState(result.state);
       version = result.version;
       rolloverWeekIfNeeded();
       saveCache();
@@ -572,7 +617,7 @@
       localStorage.setItem(PIN_STORAGE_KEY, pin);
       online = true;
       if (result.state) {
-        state = result.state;
+        state = migrateState(result.state);
         version = result.version;
       } else {
         state = state || defaultState();
@@ -630,14 +675,16 @@
     if (wasDone) {
       delete state.completions[key];
       person.points = Math.max(0, person.points - task.points);
-      person.weeklyPoints = Math.max(0, person.weeklyPoints - task.points);
+      person.completions = Math.max(0, person.completions - 1);
+      person.weeklyCompletions = Math.max(0, person.weeklyCompletions - 1);
       state.jar = Math.max(0, state.jar - state.jarShare);
       revertStreakIfLastToday(person);
       log(`↩️ ${esc(person.emoji)} ${esc(person.name)} undid ${esc(task.emoji)} ${esc(task.name)}.`);
     } else {
       state.completions[key] = todayKey();
       person.points += task.points;
-      person.weeklyPoints += task.points;
+      person.completions += 1;
+      person.weeklyCompletions += 1;
       state.jar += state.jarShare;
       bumpStreak(person);
       log(`${esc(task.emoji)} ${esc(person.emoji)} ${esc(person.name)} finished ${esc(task.name)} (+${task.points} pts).`);
@@ -681,15 +728,12 @@
   function renderScoreboard() {
     const el = document.getElementById("scoreboard");
     const leaderId = (() => {
-      const sorted = state.people.slice().sort((a, b) => b.weeklyPoints - a.weeklyPoints);
-      if (sorted.length < 2 || sorted[0].weeklyPoints === sorted[1].weeklyPoints || sorted[0].weeklyPoints === 0) return null;
+      const sorted = state.people.slice().sort((a, b) => b.weeklyCompletions - a.weeklyCompletions);
+      if (sorted.length < 2 || sorted[0].weeklyCompletions === sorted[1].weeklyCompletions || sorted[0].weeklyCompletions === 0) return null;
       return sorted[0].id;
     })();
 
     el.innerHTML = state.people.map((p, i) => {
-      const rank = rankFor(p.points);
-      const next = RANKS[RANKS.indexOf(rank) + 1];
-      const pct = next ? Math.min(100, Math.round(((p.points - rank.min) / (next.min - rank.min)) * 100)) : 100;
       const color = i === 0 ? "var(--p1)" : "var(--p2)";
       return `
         <div class="player-card">
@@ -699,12 +743,11 @@
             <span class="name">${esc(p.name)}</span>
             ${leaderId === p.id ? '<span class="crown" title="Leading this week">👑</span>' : ""}
           </div>
-          <div class="rank">${esc(rank.emoji)} ${esc(rank.title)}</div>
-          <div class="week-points">${p.weeklyPoints}</div>
-          <div class="week-label">points this week</div>
-          <div class="bar"><i style="width:${pct}%;background:${color}"></i></div>
+          <div class="week-points">${esc(p.weeklyCompletions)}</div>
+          <div class="week-label">chores this week</div>
+          <div class="coins">🪙 ${esc(p.points)} pts saved</div>
           <div class="foot">
-            <span>All-time: ${p.points}</span>
+            <span>All-time: ${esc(p.completions)} chores</span>
             <span class="streak">🔥 ${p.streak}${p.streak >= (p.bestStreak || 0) && p.streak > 1 ? " (best!)" : ""}</span>
           </div>
         </div>`;
@@ -727,7 +770,10 @@
         <span class="task-emoji">${esc(t.emoji)}</span>
         <div class="task-info">
           <div class="task-name">${esc(t.name)}</div>
-          <div class="task-pts">${t.points} pts</div>
+          <div class="task-meta">
+            <span class="task-pts">${esc(t.points)} pts</span>
+            <span class="freq-badge freq-${t.frequency}">${esc(FREQ_LABELS[t.frequency] || "Daily")}</span>
+          </div>
         </div>
         <div class="task-actions">
           ${state.people.map((p) => `
@@ -877,27 +923,30 @@
   function renderSettings() {
     document.getElementById("playerFields").innerHTML = state.people.map((p) => `
       <div class="field-row">
-        <input type="text" class="emoji-input" data-role="p-emoji" data-id="${p.id}" value="${esc(p.emoji)}" />
-        <input type="text" data-role="p-name" data-id="${p.id}" value="${esc(p.name)}" />
+        <input type="text" class="emoji-input" data-role="p-emoji" data-id="${esc(p.id)}" value="${esc(p.emoji)}" />
+        <input type="text" data-role="p-name" data-id="${esc(p.id)}" value="${esc(p.name)}" />
       </div>
     `).join("");
 
     document.getElementById("taskFields").innerHTML = state.tasks.map((t) => `
       <div class="field-row">
-        <input type="text" class="emoji-input" data-role="t-emoji" data-id="${t.id}" value="${esc(t.emoji)}" />
-        <input type="text" data-role="t-name" data-id="${t.id}" value="${esc(t.name)}" />
-        <input type="number" class="pts-input" data-role="t-pts" data-id="${t.id}" value="${t.points}" />
-        <button class="del-btn" data-role="t-del" data-id="${t.id}" title="Remove">✕</button>
+        <input type="text" class="emoji-input" data-role="t-emoji" data-id="${esc(t.id)}" value="${esc(t.emoji)}" />
+        <input type="text" data-role="t-name" data-id="${esc(t.id)}" value="${esc(t.name)}" />
+        <input type="number" class="pts-input" data-role="t-pts" data-id="${esc(t.id)}" value="${esc(t.points)}" />
+        <select class="freq-input" data-role="t-freq" data-id="${esc(t.id)}">
+          ${FREQUENCIES.map((f) => `<option value="${f}" ${t.frequency === f ? "selected" : ""}>${FREQ_LABELS[f]}</option>`).join("")}
+        </select>
+        <button class="del-btn" data-role="t-del" data-id="${esc(t.id)}" title="Remove">✕</button>
       </div>
     `).join("");
 
     document.getElementById("prizeFields").innerHTML = state.prizes.map((pr) => `
       <div class="field-row">
-        <input type="text" class="emoji-input" data-role="pr-emoji" data-id="${pr.id}" value="${esc(pr.emoji)}" />
-        <input type="text" data-role="pr-name" data-id="${pr.id}" value="${esc(pr.name)}" />
-        <input type="number" class="pts-input" data-role="pr-cost" data-id="${pr.id}" value="${pr.cost}" />
-        <label class="check"><input type="checkbox" data-role="pr-jar" data-id="${pr.id}" ${pr.fromJar ? "checked" : ""}/> jar</label>
-        <button class="del-btn" data-role="pr-del" data-id="${pr.id}" title="Remove">✕</button>
+        <input type="text" class="emoji-input" data-role="pr-emoji" data-id="${esc(pr.id)}" value="${esc(pr.emoji)}" />
+        <input type="text" data-role="pr-name" data-id="${esc(pr.id)}" value="${esc(pr.name)}" />
+        <input type="number" class="pts-input" data-role="pr-cost" data-id="${esc(pr.id)}" value="${esc(pr.cost)}" />
+        <label class="check"><input type="checkbox" data-role="pr-jar" data-id="${esc(pr.id)}" ${pr.fromJar ? "checked" : ""}/> jar</label>
+        <button class="del-btn" data-role="pr-del" data-id="${esc(pr.id)}" title="Remove">✕</button>
       </div>
     `).join("");
 
@@ -917,12 +966,13 @@
       });
     });
 
-    document.querySelectorAll('[data-role="t-emoji"], [data-role="t-name"], [data-role="t-pts"]').forEach((input) => {
+    document.querySelectorAll('[data-role="t-emoji"], [data-role="t-name"], [data-role="t-pts"], [data-role="t-freq"]').forEach((input) => {
       input.addEventListener("change", () => {
         const t = state.tasks.find((x) => x.id === input.dataset.id);
         if (!t) return;
         if (input.dataset.role === "t-emoji") t.emoji = input.value.trim() || t.emoji;
         else if (input.dataset.role === "t-name") t.name = input.value.trim() || t.name;
+        else if (input.dataset.role === "t-freq") t.frequency = FREQUENCIES.includes(input.value) ? input.value : "daily";
         else t.points = Math.max(0, parseInt(input.value, 10) || 0);
         persist();
       });
@@ -970,11 +1020,15 @@
     const name = document.getElementById("newTaskName").value.trim();
     if (!name) return;
     const emoji = document.getElementById("newTaskEmoji").value.trim() || "🧽";
-    const pts = Math.max(0, parseInt(document.getElementById("newTaskPts").value, 10) || 10);
-    state.tasks.push({ id: nextId("t", state.tasks), name, emoji, points: pts });
+    const freqInput = document.getElementById("newTaskFreq").value;
+    const frequency = FREQUENCIES.includes(freqInput) ? freqInput : "weekly";
+    const ptsRaw = document.getElementById("newTaskPts").value;
+    const pts = ptsRaw.trim() ? Math.max(0, parseInt(ptsRaw, 10) || 0) : FREQ_DEFAULT_PTS[frequency];
+    state.tasks.push({ id: nextId("t", state.tasks), name, emoji, points: pts, frequency });
     document.getElementById("newTaskName").value = "";
     document.getElementById("newTaskEmoji").value = "";
     document.getElementById("newTaskPts").value = "";
+    document.getElementById("newTaskFreq").value = "weekly";
     persist();
     renderSettings();
   });
@@ -1013,7 +1067,7 @@
       try {
         const parsed = JSON.parse(reader.result);
         if (!parsed || !Array.isArray(parsed.people) || !Array.isArray(parsed.tasks)) throw new Error("bad shape");
-        state = parsed;
+        state = migrateState(parsed);
         persist();
         render();
         renderSettings();
@@ -1049,7 +1103,7 @@
   async function boot() {
     const cached = loadCache();
     if (cached && cached.state) {
-      state = cached.state;
+      state = migrateState(cached.state);
       version = cached.version;
     } else {
       state = defaultState();
@@ -1069,7 +1123,7 @@
       const result = await apiGet();
       online = true;
       if (result.state) {
-        state = result.state;
+        state = migrateState(result.state);
         version = result.version;
         rolloverWeekIfNeeded();
       } else {
